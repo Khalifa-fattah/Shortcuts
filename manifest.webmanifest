@@ -1,0 +1,20 @@
+{
+  "name": "Shortcuts Master",
+  "short_name": "Shortcuts",
+  "description": "The ultimate keyboard shortcuts companion for Windows, Office & Applications with AI generation and Cloud Sync.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b0f17",
+  "theme_color": "#0b0f17",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    {
+      "src": "./assets/icons/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

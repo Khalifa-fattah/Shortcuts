@@ -1,0 +1,49 @@
+/**
+ * Shortcuts Master - Right-to-Left (RTL) Arabic Stylesheet
+ */
+
+[dir="rtl"],
+body.rtl-mode {
+  font-family: var(--font-arabic);
+  direction: rtl;
+  text-align: right;
+}
+
+[dir="rtl"] .nav-search-icon {
+  left: auto;
+  right: 1rem;
+}
+
+[dir="rtl"] .nav-search-input {
+  padding: 0.65rem 2.6rem 0.65rem 1rem;
+}
+
+[dir="rtl"] .kbd-badge-hint {
+  right: auto;
+  left: 0.75rem;
+}
+
+[dir="rtl"] .detail-hero::before {
+  left: auto;
+  right: 0;
+}
+
+[dir="rtl"] .detail-nav-bar svg {
+  transform: rotate(180deg);
+}
+
+[dir="rtl"] .toast-container {
+  right: auto;
+  left: 2rem;
+}
+
+[dir="rtl"] .modal-footer {
+  justify-content: flex-start;
+}
+
+@media (max-width: 680px) {
+  [dir="rtl"] .toast-container {
+    left: 1rem;
+    right: 1rem;
+  }
+}

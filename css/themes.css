@@ -1,0 +1,101 @@
+/**
+ * Shortcuts Master - Design System & Themes
+ * Inspired by Windows 11 Fluent Design & Modern Glassmorphism.
+ */
+
+:root {
+  /* Fonts */
+  --font-sans: 'Segoe UI Variable Display', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'Cascadia Code', 'Consolas', 'Courier New', monospace;
+  --font-arabic: 'Segoe UI', 'Cairo', 'Tajawal', -apple-system, sans-serif;
+
+  /* Transitions & Radii */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Primary Brand Accent */
+  --color-primary: #3b82f6;
+  --color-primary-hover: #2563eb;
+  --color-primary-rgb: 59, 130, 246;
+
+  --color-secondary: #8b5cf6;
+  --color-secondary-hover: #7c3aed;
+
+  --color-success: #10b981;
+  --color-danger: #ef4444;
+  --color-warning: #f59e0b;
+}
+
+/* ===================== DARK THEME (DEFAULT) ===================== */
+[data-theme="dark"] {
+  --bg-app: #0b0f17;
+  --bg-gradient: radial-gradient(circle at 50% 0%, #172033 0%, #0b0f17 75%);
+  --bg-surface: #131a29;
+  --bg-surface-elevated: #1a2336;
+  --bg-surface-hover: #222d42;
+  --bg-glass: rgba(19, 26, 41, 0.75);
+  --bg-glass-card: rgba(26, 35, 54, 0.65);
+
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-card: rgba(255, 255, 255, 0.12);
+  --border-focus: #3b82f6;
+
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.55);
+  --shadow-glow: 0 0 25px rgba(59, 130, 246, 0.3);
+
+  /* Keyboard Key (KBD) Dark Style */
+  --kbd-bg: linear-gradient(180deg, #2a3449 0%, #1e2638 100%);
+  --kbd-border: #3b4661;
+  --kbd-shadow: 0 3px 0 #121824, 0 4px 6px rgba(0, 0, 0, 0.4);
+  --kbd-text: #e2e8f0;
+
+  --input-bg: #0e1422;
+  --modal-overlay: rgba(5, 8, 14, 0.75);
+}
+
+/* ===================== LIGHT THEME ===================== */
+[data-theme="light"] {
+  --bg-app: #f4f6fa;
+  --bg-gradient: radial-gradient(circle at 50% 0%, #e0e7ff 0%, #f4f6fa 70%);
+  --bg-surface: #ffffff;
+  --bg-surface-elevated: #f8fafc;
+  --bg-surface-hover: #f1f5f9;
+  --bg-glass: rgba(255, 255, 255, 0.82);
+  --bg-glass-card: rgba(255, 255, 255, 0.9);
+
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-card: rgba(0, 0, 0, 0.1);
+  --border-focus: #2563eb;
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.12);
+  --shadow-glow: 0 0 20px rgba(37, 99, 235, 0.2);
+
+  /* Keyboard Key (KBD) Light Style */
+  --kbd-bg: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+  --kbd-border: #cbd5e1;
+  --kbd-shadow: 0 2px 0 #94a3b8, 0 3px 5px rgba(0, 0, 0, 0.1);
+  --kbd-text: #1e293b;
+
+  --input-bg: #f8fafc;
+  --modal-overlay: rgba(15, 23, 42, 0.45);
+}
