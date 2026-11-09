@@ -240,14 +240,25 @@ class ShortcutsDB {
       throw new Error('Invalid JSON backup file structure.');
     }
 
+    // Keep only well-formed records: ids, names and key combos must be non-empty strings.
+    const isText = (v) => typeof v === 'string' && v.trim() !== '';
+    const isObj = (v) => v && typeof v === 'object' && !Array.isArray(v);
+    const apps = data.apps.filter(a => isObj(a) && isText(a.id) && isText(a.name));
+    const shortcuts = data.shortcuts.filter(s =>
+      isObj(s) && isText(s.id) && isText(s.appId) && isText(s.keys) && isText(s.action));
+
+    if (apps.length === 0 && shortcuts.length === 0) {
+      throw new Error('Invalid JSON backup file structure.');
+    }
+
     const tx = this.db.transaction(['apps', 'shortcuts'], 'readwrite');
     const appStore = tx.objectStore('apps');
     const shortcutStore = tx.objectStore('shortcuts');
 
-    for (const app of data.apps) {
+    for (const app of apps) {
       appStore.put(app);
     }
-    for (const shortcut of data.shortcuts) {
+    for (const shortcut of shortcuts) {
       shortcutStore.put(shortcut);
     }
 

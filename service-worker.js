@@ -1,14 +1,23 @@
 /**
  * Service Worker for Shortcuts Master PWA
- * Caches application shell and assets for offline use.
+ * - Caches the application shell for offline use (stale-while-revalidate).
+ * - Caches Google Fonts so Cairo / Inter keep working offline.
+ * - Never touches API / auth traffic (Gemini, Google Drive, Google Identity).
  */
 
-const CACHE_NAME = 'shortcuts-master-v1';
+const CACHE_NAME = 'shortcuts-master-v2';
+const FONT_CACHE_NAME = 'shortcuts-master-fonts-v1';
+const KNOWN_CACHES = [CACHE_NAME, FONT_CACHE_NAME];
+
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.webmanifest',
   './assets/icons/icon.svg',
+  './assets/icons/icon-192.png',
+  './assets/icons/icon-512.png',
+  './assets/icons/icon-maskable-512.png',
+  './assets/icons/apple-touch-icon.png',
   './css/themes.css',
   './css/styles.css',
   './css/rtl.css',
@@ -22,56 +31,64 @@ const ASSETS_TO_CACHE = [
   './js/app.js'
 ];
 
+const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];
+
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('[Service Worker] Caching app shell');
-      return cache.addAll(ASSETS_TO_CACHE);
-    }).then(() => self.skipWaiting())
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(ASSETS_TO_CACHE))
+      .then(() => self.skipWaiting())
   );
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keyList) => {
-      return Promise.all(
-        keyList.map((key) => {
-          if (key !== CACHE_NAME) {
-            console.log('[Service Worker] Removing old cache:', key);
-            return caches.delete(key);
-          }
-        })
-      );
-    }).then(() => self.clients.claim())
+    caches.keys()
+      .then((keys) => Promise.all(
+        keys.filter((key) => !KNOWN_CACHES.includes(key)).map((key) => caches.delete(key))
+      ))
+      .then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', (event) => {
-  const requestUrl = new URL(event.request.url);
+  const request = event.request;
+  if (request.method !== 'GET') return;
 
-  // Bypass cache for external APIs (Gemini, Google Drive, Google Identity)
-  if (
-    requestUrl.origin.includes('googleapis.com') ||
-    requestUrl.origin.includes('accounts.google.com') ||
-    requestUrl.origin.includes('gstatic.com')
-  ) {
+  const url = new URL(request.url);
+
+  // Google Fonts: stale-while-revalidate in their own cache (opaque responses are fine).
+  if (FONT_HOSTS.includes(url.hostname)) {
+    event.respondWith(
+      caches.open(FONT_CACHE_NAME).then((cache) =>
+        cache.match(request).then((cached) => {
+          const network = fetch(request).then((response) => {
+            if (response && (response.ok || response.type === 'opaque')) {
+              cache.put(request, response.clone());
+            }
+            return response;
+          }).catch(() => cached);
+          return cached || network;
+        })
+      )
+    );
     return;
   }
 
-  // Stale-while-revalidate strategy for local assets
+  // Bypass everything else that is not our own origin (Gemini, Drive, Identity Services...).
+  if (url.origin !== self.location.origin) return;
+
+  // Stale-while-revalidate for local assets.
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      const fetchPromise = fetch(event.request).then((networkResponse) => {
+    caches.match(request).then((cachedResponse) => {
+      const fetchPromise = fetch(request).then((networkResponse) => {
         if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
           const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, responseToCache));
         }
         return networkResponse;
       }).catch(() => {
-        // Network failed, if offline and navigation request, return index.html
-        if (event.request.mode === 'navigate') {
+        if (request.mode === 'navigate') {
           return caches.match('./index.html');
         }
       });

@@ -14,6 +14,7 @@ class AppController {
     this.searchQuery = '';
     this.deferredInstallPrompt = null;
     this.aiGeneratedResult = null;
+    this.appColorTouched = false;
   }
 
   async init() {
@@ -25,6 +26,9 @@ class AppController {
 
     // 3. Initialize i18n
     window.i18n.apply();
+
+    // 3b. Replace native <select> menus with the app-styled dropdowns
+    window.ui.enhanceSelects();
 
     // 4. Setup PWA install prompt handler
     this.setupPwaInstall();
@@ -47,7 +51,10 @@ class AppController {
     const hash = window.location.hash || '#';
     this.searchQuery = '';
     const searchInput = document.getElementById('global-search-input');
-    if (searchInput) searchInput.value = '';
+    if (searchInput) {
+      searchInput.value = '';
+      searchInput.placeholder = window.t('searchPlaceholder');
+    }
 
     if (hash.startsWith('#app/')) {
       const appId = hash.replace('#app/', '').trim();
@@ -159,20 +166,21 @@ class AppController {
       const name = isAr && app.nameAr ? app.nameAr : app.name;
       const desc = isAr && app.descriptionAr ? app.descriptionAr : (app.description || '');
       const count = countMap[app.id] || 0;
-      const iconHtml = window.getIcon(app.icon || 'appDefault', 'app-card-icon');
-      const accentColor = app.color || '#6366F1';
+      const iconHtml = window.getAppIcon(app, 'app-card-icon');
+      const accentColor = window.ui.safeColor(app.color);
+      const safeId = window.ui.escapeHtml(app.id);
 
       return `
-        <div class="app-card animate-fade-in" data-id="${app.id}" style="--accent-color: ${accentColor}">
+        <div class="app-card animate-fade-in" data-id="${safeId}" style="--accent-color: ${accentColor}">
           <div class="app-card-header">
             <div class="app-card-icon-wrapper" style="background-color: ${accentColor}18; border-color: ${accentColor}40;">
               ${iconHtml}
             </div>
             <div class="app-card-actions">
-              <button class="icon-btn edit-app-btn" title="${window.t('editApp')}" data-id="${app.id}">
+              <button class="icon-btn edit-app-btn" title="${window.t('editApp')}" aria-label="${window.t('editApp')}" data-id="${safeId}">
                 ${window.ICONS.edit}
               </button>
-              <button class="icon-btn delete-app-btn" title="${window.t('deleteApp')}" data-id="${app.id}">
+              <button class="icon-btn delete-app-btn" title="${window.t('deleteApp')}" aria-label="${window.t('deleteApp')}" data-id="${safeId}">
                 ${window.ICONS.trash}
               </button>
             </div>
@@ -187,7 +195,7 @@ class AppController {
             <span class="badge shortcut-count-badge">
               ${window.t('shortcutsCount', { count })}
             </span>
-            <button class="btn btn-outline view-app-btn" data-id="${app.id}">
+            <button class="btn btn-outline view-app-btn" data-id="${safeId}">
               ${window.t('openShortcuts')}
             </button>
           </div>
@@ -235,6 +243,13 @@ class AppController {
       return;
     }
 
+    const searchInput = document.getElementById('global-search-input');
+    if (searchInput) {
+      const isAr = window.i18n.getLang() === 'ar';
+      const appName = isAr && app.nameAr ? app.nameAr : app.name;
+      searchInput.placeholder = window.t('searchInAppPlaceholder', { appName });
+    }
+
     const shortcuts = await window.db.getShortcutsByApp(appId);
     this.renderAppDetailHeader(app, shortcuts.length);
     this.renderShortcutCategoryTabs(shortcuts);
@@ -246,7 +261,7 @@ class AppController {
     const isAr = lang === 'ar';
     const name = isAr && app.nameAr ? app.nameAr : app.name;
     const desc = isAr && app.descriptionAr ? app.descriptionAr : (app.description || '');
-    const accentColor = app.color || '#6366F1';
+    const accentColor = window.ui.safeColor(app.color);
 
     const header = document.getElementById('app-detail-header');
     if (!header) return;
@@ -261,7 +276,7 @@ class AppController {
 
       <div class="detail-hero" style="--accent-color: ${accentColor}">
         <div class="detail-hero-icon" style="background-color: ${accentColor}20; border-color: ${accentColor}50;">
-          ${window.getIcon(app.icon || 'appDefault', 'hero-icon')}
+          ${window.getAppIcon(app, 'hero-icon')}
         </div>
         <div class="detail-hero-info">
           <div class="hero-title-row">
@@ -380,15 +395,17 @@ class AppController {
       const category = isAr && item.categoryAr ? item.categoryAr : (item.category || 'General');
       const formattedKeys = window.ui.formatKeys(item.keys);
 
+      const safeId = window.ui.escapeHtml(item.id);
+
       return `
-        <div class="shortcut-card animate-fade-in" data-id="${item.id}">
+        <div class="shortcut-card animate-fade-in" data-id="${safeId}">
           <div class="shortcut-keys-col">
             <div class="keys-display">
               ${formattedKeys}
             </div>
-            <button class="btn btn-sm btn-ghost copy-shortcut-btn" data-keys="${window.ui.escapeHtml(item.keys)}" title="Click to copy">
+            <button class="btn btn-sm btn-ghost copy-shortcut-btn" data-keys="${window.ui.escapeHtml(item.keys)}" title="${window.t('copyTitle')}">
               ${window.ICONS.copy}
-              <span>Copy</span>
+              <span>${window.t('copyBtn')}</span>
             </button>
           </div>
 
@@ -401,10 +418,10 @@ class AppController {
           </div>
 
           <div class="shortcut-actions-col">
-            <button class="icon-btn edit-shortcut-btn" title="${window.t('editShortcut')}" data-id="${item.id}">
+            <button class="icon-btn edit-shortcut-btn" title="${window.t('editShortcut')}" aria-label="${window.t('editShortcut')}" data-id="${safeId}">
               ${window.ICONS.edit}
             </button>
-            <button class="icon-btn delete-shortcut-btn" title="${window.t('deleteShortcut')}" data-id="${item.id}">
+            <button class="icon-btn delete-shortcut-btn" title="${window.t('deleteShortcut')}" aria-label="${window.t('deleteShortcut')}" data-id="${safeId}">
               ${window.ICONS.trash}
             </button>
           </div>
@@ -437,10 +454,23 @@ class AppController {
   }
 
   // ===================== MODALS & FORMS =====================
+  /** Deterministic accent color for a new app whose color the user left untouched. */
+  pickColorForName(name) {
+    const palette = ['#6366F1', '#0EA5E9', '#10B981', '#F59E0B', '#EF4444',
+                     '#EC4899', '#8B5CF6', '#14B8A6', '#F97316', '#84CC16'];
+    let hash = 0;
+    for (const ch of String(name)) hash = (hash * 31 + ch.codePointAt(0)) >>> 0;
+    return palette[hash % palette.length];
+  }
+
   openAddAppModal() {
     const form = document.getElementById('app-form');
     form.reset();
     document.getElementById('app-form-id').value = '';
+    document.getElementById('app-category-select').value = 'custom';
+    document.getElementById('app-icon-select').value = 'auto';
+    document.getElementById('app-ar-details').open = false;
+    this.appColorTouched = false;
     document.getElementById('modal-app-title').textContent = window.t('modalAddAppTitle');
     window.ui.openModal('app-modal');
   }
@@ -453,9 +483,13 @@ class AppController {
     document.getElementById('app-form-id').value = app.id;
     document.getElementById('app-name-input').value = app.name || '';
     document.getElementById('app-category-select').value = app.category || 'custom';
-    document.getElementById('app-color-input').value = app.color || '#6366F1';
-    document.getElementById('app-icon-select').value = app.icon || 'appDefault';
+    document.getElementById('app-color-input').value = window.ui.safeColor(app.color);
+    document.getElementById('app-icon-select').value = app.icon || 'auto';
     document.getElementById('app-desc-input').value = app.description || '';
+    document.getElementById('app-name-ar-input').value = app.nameAr || '';
+    document.getElementById('app-desc-ar-input').value = app.descriptionAr || '';
+    document.getElementById('app-ar-details').open = Boolean(app.nameAr || app.descriptionAr);
+    this.appColorTouched = true;
 
     window.ui.openModal('app-modal');
   }
@@ -465,22 +499,33 @@ class AppController {
     const id = document.getElementById('app-form-id').value.trim();
     const name = document.getElementById('app-name-input').value.trim();
     const category = document.getElementById('app-category-select').value;
-    const color = document.getElementById('app-color-input').value;
+    let color = document.getElementById('app-color-input').value;
     const icon = document.getElementById('app-icon-select').value;
     const description = document.getElementById('app-desc-input').value.trim();
+    const nameAr = document.getElementById('app-name-ar-input').value.trim();
+    const descriptionAr = document.getElementById('app-desc-ar-input').value.trim();
 
     if (!name) {
       window.ui.showToast(window.t('validationError'), 'error');
       return;
     }
 
+    // A new app whose color was never touched gets a color derived from its name,
+    // so automatic letter icons are not all the same indigo.
+    if (!id && !this.appColorTouched) color = this.pickColorForName(name);
+
+    // Merge into the stored record so fields not shown in the form are preserved.
+    const existing = id ? await window.db.getApp(id) : null;
     const appObj = {
+      ...(existing || {}),
       id: id || undefined,
       name,
+      nameAr,
       category,
       color,
       icon,
-      description
+      description,
+      descriptionAr
     };
 
     await window.db.saveApp(appObj);
@@ -495,7 +540,12 @@ class AppController {
   }
 
   async confirmDeleteApp(appId) {
-    if (confirm(window.t('confirmDeleteApp'))) {
+    const ok = await window.ui.confirm({
+      message: window.t('confirmDeleteApp'),
+      confirmText: window.t('deleteBtn'),
+      danger: true
+    });
+    if (ok) {
       await window.db.deleteApp(appId);
       window.ui.showToast(window.t('deletedSuccess'), 'success');
       if (this.currentView === 'home') {
@@ -511,6 +561,7 @@ class AppController {
     form.reset();
     document.getElementById('shortcut-form-id').value = '';
     document.getElementById('shortcut-app-id').value = appId;
+    document.getElementById('shortcut-ar-details').open = false;
     document.getElementById('modal-shortcut-title').textContent = window.t('modalAddShortcutTitle');
     window.ui.openModal('shortcut-modal');
   }
@@ -527,6 +578,11 @@ class AppController {
     document.getElementById('shortcut-action-input').value = shortcut.action || '';
     document.getElementById('shortcut-category-input').value = shortcut.category || '';
     document.getElementById('shortcut-desc-input').value = shortcut.description || '';
+    document.getElementById('shortcut-action-ar-input').value = shortcut.actionAr || '';
+    document.getElementById('shortcut-category-ar-input').value = shortcut.categoryAr || '';
+    document.getElementById('shortcut-desc-ar-input').value = shortcut.descriptionAr || '';
+    document.getElementById('shortcut-ar-details').open =
+      Boolean(shortcut.actionAr || shortcut.categoryAr || shortcut.descriptionAr);
 
     window.ui.openModal('shortcut-modal');
   }
@@ -539,19 +595,33 @@ class AppController {
     const action = document.getElementById('shortcut-action-input').value.trim();
     const category = document.getElementById('shortcut-category-input').value.trim() || 'General';
     const description = document.getElementById('shortcut-desc-input').value.trim();
+    const actionAr = document.getElementById('shortcut-action-ar-input').value.trim();
+    const categoryAr = document.getElementById('shortcut-category-ar-input').value.trim();
+    const descriptionAr = document.getElementById('shortcut-desc-ar-input').value.trim();
 
     if (!keys || !action || !appId) {
       window.ui.showToast(window.t('validationError'), 'error');
       return;
     }
 
+    // Merge into the stored record so fields not shown in the form are preserved.
+    let existing = null;
+    if (id) {
+      const appShortcuts = await window.db.getShortcutsByApp(appId);
+      existing = appShortcuts.find(s => s.id === id) || null;
+    }
+
     const shortcutObj = {
+      ...(existing || {}),
       id: id || undefined,
       appId,
       keys,
       action,
+      actionAr,
       category,
-      description
+      categoryAr,
+      description,
+      descriptionAr
     };
 
     await window.db.saveShortcut(shortcutObj);
@@ -564,7 +634,12 @@ class AppController {
   }
 
   async confirmDeleteShortcut(shortcutId) {
-    if (confirm(window.t('confirmDeleteShortcut'))) {
+    const ok = await window.ui.confirm({
+      message: window.t('confirmDeleteShortcut'),
+      confirmText: window.t('deleteBtn'),
+      danger: true
+    });
+    if (ok) {
       await window.db.deleteShortcut(shortcutId);
       window.ui.showToast(window.t('deletedSuccess'), 'success');
       if (this.currentAppId) {
@@ -608,8 +683,7 @@ class AppController {
     importBtn.style.display = 'none';
 
     try {
-      const lang = window.i18n.getLang();
-      const result = await window.gemini.generateShortcuts(softwareName, lang);
+      const result = await window.gemini.generateShortcuts(softwareName);
       this.aiGeneratedResult = result;
 
       loadingContainer.style.display = 'none';
@@ -622,8 +696,13 @@ class AppController {
       if (err.message === 'NO_API_KEY') {
         window.ui.showToast(window.t('aiMissingKeyWarning'), 'error', 4500);
         window.ui.openModal('settings-modal');
+      } else if (err.message === 'MODEL_UNAVAILABLE') {
+        window.ui.showToast(window.t('aiModelUnavailable'), 'error', 6000);
+        this.openSettingsModal();
+      } else if (err.message === 'AI_TRUNCATED') {
+        window.ui.showToast(window.t('aiTruncated'), 'error', 5000);
       } else {
-        window.ui.showToast(`${window.t('aiError')}: ${err.message}`, 'error', 5000);
+        window.ui.showToast(`${window.t('aiError')} (${err.message})`, 'error', 5000);
       }
     }
   }
@@ -664,6 +743,7 @@ class AppController {
     }
 
     // Check if app already exists by name or currentAppId
+    const appName = (data.appName || document.getElementById('ai-app-name-input').value || '').trim();
     let appId = this.currentAppId;
     let existingApp = null;
 
@@ -671,17 +751,17 @@ class AppController {
       existingApp = await window.db.getApp(appId);
     } else {
       const allApps = await window.db.getAllApps();
-      existingApp = allApps.find(a => a.name.toLowerCase() === data.appName.toLowerCase());
+      existingApp = allApps.find(a => a.name.toLowerCase() === appName.toLowerCase());
     }
 
     if (!existingApp) {
-      // Create new application
+      // Create new application with an automatic letter icon
       const newApp = {
-        name: data.appName,
-        nameAr: data.nameAr || data.appName,
+        name: appName,
+        nameAr: data.nameAr || appName,
         category: data.category || 'custom',
-        color: data.color || '#6366F1',
-        icon: 'appDefault',
+        color: data.color ? window.ui.safeColor(data.color) : this.pickColorForName(appName),
+        icon: 'auto',
         description: data.description || '',
         descriptionAr: data.descriptionAr || ''
       };
@@ -712,13 +792,12 @@ class AppController {
   // ===================== SETTINGS & GOOGLE DRIVE =====================
   async openSettingsModal() {
     const geminiKey = await window.db.getSetting('gemini_api_key', '');
-    const geminiModel = await window.db.getSetting('gemini_model', 'gemini-1.5-flash');
     const googleClientId = await window.db.getSetting('google_client_id', '');
     const driveEmail = await window.db.getSetting('drive_user_email', '');
     const lastSync = await window.db.getSetting('drive_last_sync', '');
 
     document.getElementById('gemini-key-input').value = geminiKey;
-    document.getElementById('gemini-model-select').value = geminiModel;
+    this.setModelSelectValue(await window.gemini.getModel());
     document.getElementById('google-client-id-input').value = googleClientId;
 
     const driveStatusText = document.getElementById('drive-status-text');
@@ -740,9 +819,43 @@ class AppController {
     window.ui.openModal('settings-modal');
   }
 
+  /** Select a model in the settings dropdown, adding it to the list if it is not there yet. */
+  setModelSelectValue(modelId) {
+    const select = document.getElementById('gemini-model-select');
+    if (!Array.from(select.options).some(o => o.value === modelId)) {
+      select.add(new Option(modelId, modelId), 0);
+    }
+    select.value = modelId;
+  }
+
+  async handleRefreshModels() {
+    const btn = document.getElementById('refresh-models-btn');
+    const select = document.getElementById('gemini-model-select');
+    btn.disabled = true;
+    try {
+      const typedKey = document.getElementById('gemini-key-input').value.trim();
+      const models = await window.gemini.listModels(typedKey);
+      if (models.length === 0) throw new Error('0');
+
+      const current = select.value;
+      select.innerHTML = '';
+      models.forEach(m => select.add(new Option(m.label, m.id)));
+      this.setModelSelectValue(models.some(m => m.id === current) ? current : models[0].id);
+      window.ui.showToast(window.t('modelsRefreshed', { count: models.length }), 'success');
+    } catch (err) {
+      if (err.message === 'NO_API_KEY') {
+        window.ui.showToast(window.t('aiMissingKeyWarning'), 'error', 4500);
+      } else {
+        window.ui.showToast(window.t('modelsRefreshFailed', { error: err.message }), 'error', 5000);
+      }
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
   async saveSettings() {
     const geminiKey = document.getElementById('gemini-key-input').value.trim();
-    const geminiModel = document.getElementById('gemini-model-select').value;
+    const geminiModel = document.getElementById('gemini-model-select').value || window.gemini.defaultModel;
     const googleClientId = document.getElementById('google-client-id-input').value.trim();
 
     await window.db.saveSetting('gemini_api_key', geminiKey);
@@ -760,7 +873,7 @@ class AppController {
       this.openSettingsModal(); // Refresh sync time display
     } catch (err) {
       if (err.message === 'MISSING_CLIENT_ID') {
-        window.ui.showToast('Please enter your Google OAuth Client ID first.', 'error');
+        window.ui.showToast(window.t('driveMissingClientId'), 'error');
       } else {
         window.ui.showToast(window.t('driveError', { error: err.message }), 'error', 4500);
       }
@@ -768,9 +881,17 @@ class AppController {
   }
 
   async handleDriveRestore() {
-    if (!confirm(window.t('driveConfirmRestore'))) return;
+    const ok = await window.ui.confirm({
+      message: window.t('driveConfirmRestore'),
+      confirmText: window.t('restoreBtn')
+    });
+    if (!ok) return;
 
     try {
+      if (!(await window.driveSync.getClientId() || '').trim()) {
+        window.ui.showToast(window.t('driveMissingClientId'), 'error');
+        return;
+      }
       window.ui.showToast(window.t('driveStatusSyncing'), 'info');
       await window.driveSync.restoreFromDrive();
       window.ui.showToast(window.t('driveRestoreSuccess'), 'success');
@@ -792,7 +913,7 @@ class AppController {
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
-    window.ui.showToast('Backup file downloaded.', 'success');
+    window.ui.showToast(window.t('backupDownloaded'), 'success');
   }
 
   handleImportJsonClick() {
@@ -811,14 +932,19 @@ class AppController {
       window.ui.closeModal('settings-modal');
       await this.handleRouting();
     } catch (err) {
-      window.ui.showToast(`Import error: ${err.message}`, 'error', 4000);
+      window.ui.showToast(window.t('importError', { error: err.message }), 'error', 4000);
     } finally {
       e.target.value = '';
     }
   }
 
   async handleResetDb() {
-    if (confirm(window.t('confirmResetDb'))) {
+    const ok = await window.ui.confirm({
+      message: window.t('confirmResetDb'),
+      confirmText: window.t('resetBtn'),
+      danger: true
+    });
+    if (ok) {
       await window.db.resetToDefaults();
       window.ui.showToast(window.t('resetSuccessToast'), 'success');
       window.ui.closeModal('settings-modal');
@@ -849,7 +975,7 @@ class AppController {
 
     window.addEventListener('appinstalled', () => {
       installBtn.style.display = 'none';
-      window.ui.showToast('Shortcuts Master installed successfully!', 'success');
+      window.ui.showToast(window.t('pwaInstalled'), 'success');
     });
   }
 
@@ -909,6 +1035,16 @@ class AppController {
     });
     document.getElementById('ai-generate-app-btn').addEventListener('click', () => {
       this.openAiModal();
+    });
+
+    // Remember when the user picks an accent color on purpose
+    document.getElementById('app-color-input').addEventListener('input', () => {
+      this.appColorTouched = true;
+    });
+
+    // Refresh the Gemini model list from the API
+    document.getElementById('refresh-models-btn').addEventListener('click', () => {
+      this.handleRefreshModels();
     });
 
     // App Form Submit

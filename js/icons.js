@@ -169,6 +169,25 @@ const ICONS = {
       <line x1="6" y1="6" x2="18" y2="18"></line>
     </svg>
   `,
+  alert: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="8" x2="12" y2="12"></line>
+      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+    </svg>
+  `,
+  info: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="16" x2="12" y2="12"></line>
+      <line x1="12" y1="8" x2="12.01" y2="8"></line>
+    </svg>
+  `,
+  chevronDown: `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 12 15 18 9"></polyline>
+    </svg>
+  `,
   download: `
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -200,7 +219,43 @@ function getIcon(name, className = 'icon') {
   return `<span class="${className} icon-${name}">${svg}</span>`;
 }
 
+/**
+ * Automatic app icon: the first letter of the app name on its accent color.
+ * Text color flips to dark on light accents so the letter stays readable.
+ */
+function letterAvatar(app, className = 'icon') {
+  const rawColor = String(app.color || '').trim();
+  let color = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(rawColor) ? rawColor : '#6366F1';
+
+  let hex = color.slice(1);
+  if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+  const r = parseInt(hex.slice(0, 2), 16);
+  const g = parseInt(hex.slice(2, 4), 16);
+  const b = parseInt(hex.slice(4, 6), 16);
+  const isLight = (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.68;
+  const textColor = isLight ? '#111827' : '#FFFFFF';
+
+  const name = String(app.name || app.nameAr || '').trim().replace(/^[^\p{L}\p{N}]+/u, '');
+  const letter = (Array.from(name)[0] || '?').toLocaleUpperCase();
+
+  const svg = `
+    <svg viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="10" y="10" width="76" height="76" rx="20" fill="${color}"/>
+      <rect x="11" y="11" width="74" height="74" rx="19" stroke="#FFFFFF" stroke-opacity="0.25" stroke-width="2"/>
+      <text x="48" y="50" text-anchor="middle" dominant-baseline="central" font-size="44" font-weight="700"
+            fill="${textColor}" font-family="'Segoe UI', Cairo, system-ui, sans-serif">${letter}</text>
+    </svg>`;
+  return `<span class="${className} icon-auto">${svg}</span>`;
+}
+
+/** Icon for an app record: 'auto' (or no icon) draws the letter avatar, otherwise a built-in icon. */
+function getAppIcon(app, className = 'icon') {
+  if (!app.icon || app.icon === 'auto') return letterAvatar(app, className);
+  return getIcon(app.icon, className);
+}
+
 if (typeof window !== 'undefined') {
   window.ICONS = ICONS;
   window.getIcon = getIcon;
+  window.getAppIcon = getAppIcon;
 }

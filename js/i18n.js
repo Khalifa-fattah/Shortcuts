@@ -7,8 +7,9 @@ const TRANSLATIONS = {
   en: {
     // App Header & Branding
     appTitle: "Shortcuts Master",
+    navTitle: "Shortcuts Master",
     appSubtitle: "Instant keyboard shortcuts for Windows, Office & Software",
-    searchPlaceholder: "Search shortcuts, apps, or keys (e.g. Ctrl+C, snap, table)...",
+    searchPlaceholder: "Search shortcuts, apps or keys...",
     
     // Top Bar Actions
     themeLight: "Light Mode",
@@ -38,7 +39,7 @@ const TRANSLATIONS = {
     
     // App Detail View
     backToApps: "All Applications",
-    searchInAppPlaceholder: "Search in {appName} (e.g. 'save', 'Ctrl', 'format')...",
+    searchInAppPlaceholder: "Search in {appName}...",
     allShortcutsTab: "All Shortcuts",
     addShortcutBtn: "Add Shortcut",
     aiExpandBtn: "Generate More with AI",
@@ -124,6 +125,44 @@ const TRANSLATIONS = {
     resetSuccessToast: "Database successfully reset to defaults.",
     importSuccessToast: "Data successfully imported!",
 
+    // Copy
+    copyBtn: "Copy",
+    copyTitle: "Copy keys",
+    copyFailedToast: "Failed to copy to clipboard",
+
+    // Confirm dialogs
+    confirmTitle: "Please confirm",
+    confirmBtn: "Confirm",
+    deleteBtn: "Delete",
+    restoreBtn: "Restore",
+    resetBtn: "Reset",
+
+    // Icons
+    iconAuto: "Automatic (first letter)",
+    iconDefault: "Default Gradient App",
+
+    // Optional Arabic translation fields
+    arabicSection: "Arabic translation (optional)",
+    appNameArLabel: "Application name (Arabic)",
+    appDescArLabel: "Description (Arabic)",
+    shortcutActionArLabel: "Action / Title (Arabic)",
+    shortcutCategoryArLabel: "Category (Arabic)",
+    shortcutDescArLabel: "Explanation (Arabic)",
+
+    // Gemini models
+    refreshModelsBtn: "Refresh model list",
+    modelsHelp: "Model names change over time. Use the button to load the models available for your API key.",
+    modelsRefreshed: "Loaded {count} models.",
+    modelsRefreshFailed: "Could not load the model list: {error}",
+    aiModelUnavailable: "The selected Gemini model is no longer available. Pick another one in Settings (use Refresh model list).",
+    aiTruncated: "Gemini's answer was cut off. Please try again or choose a different model.",
+
+    // Misc toasts
+    driveMissingClientId: "Please enter your Google OAuth Client ID first.",
+    backupDownloaded: "Backup file downloaded.",
+    importError: "Import error: {error}",
+    pwaInstalled: "Shortcuts Master installed successfully!",
+
     // General Toasts
     savedSuccess: "Saved successfully!",
     deletedSuccess: "Deleted successfully!",
@@ -133,8 +172,9 @@ const TRANSLATIONS = {
   ar: {
     // App Header & Branding
     appTitle: "سيد الاختصارات | Shortcuts Master",
+    navTitle: "سيد الاختصارات",
     appSubtitle: "المرجع الشامل لاختصارات لوحة المفاتيح لويندوز وتطبيقات الأوفيس والبرامج",
-    searchPlaceholder: "ابحث عن أي اختصار، تطبيق، أو مفتاح (مثل Ctrl+C، جدول، نافذة)...",
+    searchPlaceholder: "ابحث عن اختصار أو تطبيق أو مفتاح...",
     
     // Top Bar Actions
     themeLight: "الوضع النهاري",
@@ -164,7 +204,7 @@ const TRANSLATIONS = {
     
     // App Detail View
     backToApps: "الرجوع لكافة التطبيقات",
-    searchInAppPlaceholder: "بحث داخل {appName} (مثلاً 'حفظ', 'Ctrl', 'تنسيق')...",
+    searchInAppPlaceholder: "ابحث داخل {appName}...",
     allShortcutsTab: "كافة الاختصارات",
     addShortcutBtn: "إضافة اختصار",
     aiExpandBtn: "جلب المزيد عبر الذكاء الاصطناعي",
@@ -249,6 +289,44 @@ const TRANSLATIONS = {
     confirmResetDb: "هل أنت متأكد من رغبتك في إعادة تعيين قاعدة البيانات؟ سيتم استبدال التطبيقات المخصصة بالاختصارات الأصلية.",
     resetSuccessToast: "تمت استعادة البيانات الافتراضية بنجاح.",
     importSuccessToast: "تم استيراد البيانات بنجاح!",
+
+    // Copy
+    copyBtn: "نسخ",
+    copyTitle: "نسخ المفاتيح",
+    copyFailedToast: "تعذر النسخ إلى الحافظة",
+
+    // Confirm dialogs
+    confirmTitle: "تأكيد الإجراء",
+    confirmBtn: "تأكيد",
+    deleteBtn: "حذف",
+    restoreBtn: "استعادة",
+    resetBtn: "إعادة تعيين",
+
+    // Icons
+    iconAuto: "تلقائية (الحرف الأول)",
+    iconDefault: "أيقونة افتراضية متدرجة",
+
+    // Optional Arabic translation fields
+    arabicSection: "الترجمة العربية (اختياري)",
+    appNameArLabel: "اسم التطبيق بالعربية",
+    appDescArLabel: "النبذة بالعربية",
+    shortcutActionArLabel: "الوظيفة / العنوان بالعربية",
+    shortcutCategoryArLabel: "التصنيف بالعربية",
+    shortcutDescArLabel: "الشرح بالعربية",
+
+    // Gemini models
+    refreshModelsBtn: "تحديث قائمة النماذج",
+    modelsHelp: "أسماء النماذج تتغير مع الوقت. استخدم الزر لجلب النماذج المتاحة لمفتاحك.",
+    modelsRefreshed: "تم جلب {count} نموذج.",
+    modelsRefreshFailed: "تعذر جلب قائمة النماذج: {error}",
+    aiModelUnavailable: "نموذج Gemini المختار لم يعد متاحاً. اختر نموذجاً آخر من الإعدادات (استخدم تحديث قائمة النماذج).",
+    aiTruncated: "انقطعت إجابة Gemini قبل اكتمالها. حاول مجدداً أو اختر نموذجاً آخر.",
+
+    // Misc toasts
+    driveMissingClientId: "يرجى إدخال معرّف عميل Google (OAuth Client ID) أولاً.",
+    backupDownloaded: "تم تنزيل ملف النسخة الاحتياطية.",
+    importError: "خطأ في الاستيراد: {error}",
+    pwaInstalled: "تم تثبيت التطبيق بنجاح!",
 
     // General Toasts
     savedSuccess: "تم الحفظ بنجاح!",

@@ -18,11 +18,6 @@ body.rtl-mode {
   padding: 0.65rem 2.6rem 0.65rem 1rem;
 }
 
-[dir="rtl"] .kbd-badge-hint {
-  right: auto;
-  left: 0.75rem;
-}
-
 [dir="rtl"] .detail-hero::before {
   left: auto;
   right: 0;
@@ -34,7 +29,7 @@ body.rtl-mode {
 
 [dir="rtl"] .toast-container {
   right: auto;
-  left: 2rem;
+  left: 1.5rem;
 }
 
 [dir="rtl"] .modal-footer {

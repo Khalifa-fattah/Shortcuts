@@ -41,7 +41,8 @@
 
 - 📱 **PWA & Offline First**:
   - Installable directly to your Windows desktop or mobile home screen as a native application.
-  - Works 100% offline via Service Worker & IndexedDB.
+  - Works 100% offline via Service Worker & IndexedDB (Google Fonts are cached too).
+  - New apps get an automatic first-letter icon; Gemini model list can be refreshed from Settings.
 
 ---
 
@@ -134,7 +135,9 @@ Then visit `http://localhost:8000`.
 │   └── app.js              # Main application router & logic
 └── assets/
     └── icons/
-        └── icon.svg        # Scalable application icon
+        ├── icon.svg            # Scalable application icon
+        ├── icon-maskable.svg   # Full-bleed source for the maskable icon
+        └── *.png               # PWA icons (192, 512, maskable, apple-touch)
 ```
 
 ---
