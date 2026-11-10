@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Shortcuts Master - Main Application Controller
  * Coordinates Views, Routing, State, Event Listeners, and AI/Sync Integrations.
  */
@@ -389,45 +389,72 @@ class AppController {
       return;
     }
 
-    listContainer.innerHTML = filtered.map(item => {
-      const action = isAr && item.actionAr ? item.actionAr : item.action;
-      const desc = isAr && item.descriptionAr ? item.descriptionAr : (item.description || '');
-      const category = isAr && item.categoryAr ? item.categoryAr : (item.category || 'General');
-      const formattedKeys = window.ui.formatKeys(item.keys);
+    // Group filtered shortcuts by category
+    const groupsMap = new Map();
+    filtered.forEach(item => {
+      const cat = isAr && item.categoryAr ? item.categoryAr : (item.category || (isAr ? 'عام' : 'General'));
+      if (!groupsMap.has(cat)) {
+        groupsMap.set(cat, []);
+      }
+      groupsMap.get(cat).push(item);
+    });
 
-      const safeId = window.ui.escapeHtml(item.id);
-
-      return `
-        <div class="shortcut-card animate-fade-in" data-id="${safeId}">
-          <div class="shortcut-keys-col">
-            <div class="keys-display">
-              ${formattedKeys}
-            </div>
-            <button class="btn btn-sm btn-ghost copy-shortcut-btn" data-keys="${window.ui.escapeHtml(item.keys)}" title="${window.t('copyTitle')}">
-              ${window.ICONS.copy}
-              <span>${window.t('copyBtn')}</span>
-            </button>
+    let html = '';
+    groupsMap.forEach((items, categoryTitle) => {
+      html += `
+        <div class="shortcut-category-group">
+          <div class="shortcut-category-heading">
+            <span class="category-heading-indicator"></span>
+            <h3 class="shortcut-category-title">${window.ui.escapeHtml(categoryTitle)}</h3>
+            <span class="category-heading-badge">${items.length}</span>
           </div>
+          <div class="shortcut-group-items">
+      `;
 
-          <div class="shortcut-info-col">
-            <div class="shortcut-header-row">
-              <h4 class="shortcut-title">${window.ui.escapeHtml(action)}</h4>
-              <span class="badge category-badge">${window.ui.escapeHtml(category)}</span>
+      html += items.map(item => {
+        const action = isAr && item.actionAr ? item.actionAr : item.action;
+        const desc = isAr && item.descriptionAr ? item.descriptionAr : (item.description || '');
+        const formattedKeys = window.ui.formatKeys(item.keys);
+        const safeId = window.ui.escapeHtml(item.id);
+
+        return `
+          <div class="shortcut-card animate-fade-in" data-id="${safeId}">
+            <div class="shortcut-keys-col">
+              <div class="keys-display">
+                ${formattedKeys}
+              </div>
+              <button class="btn btn-sm btn-ghost copy-shortcut-btn" data-keys="${window.ui.escapeHtml(item.keys)}" title="${window.t('copyTitle')}">
+                ${window.ICONS.copy}
+                <span>${window.t('copyBtn')}</span>
+              </button>
             </div>
-            ${desc ? `<p class="shortcut-desc">${window.ui.escapeHtml(desc)}</p>` : ''}
-          </div>
 
-          <div class="shortcut-actions-col">
-            <button class="icon-btn edit-shortcut-btn" title="${window.t('editShortcut')}" aria-label="${window.t('editShortcut')}" data-id="${safeId}">
-              ${window.ICONS.edit}
-            </button>
-            <button class="icon-btn delete-shortcut-btn" title="${window.t('deleteShortcut')}" aria-label="${window.t('deleteShortcut')}" data-id="${safeId}">
-              ${window.ICONS.trash}
-            </button>
+            <div class="shortcut-info-col">
+              <div class="shortcut-header-row">
+                <h4 class="shortcut-title">${window.ui.escapeHtml(action)}</h4>
+              </div>
+              ${desc ? `<p class="shortcut-desc">${window.ui.escapeHtml(desc)}</p>` : ''}
+            </div>
+
+            <div class="shortcut-actions-col">
+              <button class="icon-btn edit-shortcut-btn" title="${window.t('editShortcut')}" aria-label="${window.t('editShortcut')}" data-id="${safeId}">
+                ${window.ICONS.edit}
+              </button>
+              <button class="icon-btn delete-shortcut-btn" title="${window.t('deleteShortcut')}" aria-label="${window.t('deleteShortcut')}" data-id="${safeId}">
+                ${window.ICONS.trash}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      html += `
           </div>
         </div>
       `;
-    }).join('');
+    });
+
+    listContainer.innerHTML = html;
 
     // Bind Shortcut Actions
     listContainer.querySelectorAll('.copy-shortcut-btn').forEach(btn => {

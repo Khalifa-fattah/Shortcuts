@@ -80,7 +80,7 @@ Your task is to generate a comprehensive, accurate list of essential and product
 Requirements:
 1. Focus on Windows platform shortcuts (e.g. use Ctrl, Alt, Shift, Win, F-keys).
 2. Group the shortcuts into logical, high-value functional categories (e.g., General, Navigation, Editing, Selection, Window/Tabs, Tools, Advanced).
-3. Provide at least 15 to 25 of the most useful and commonly used shortcuts.
+3. Provide up to 30 of the most useful, distinct, and commonly used shortcuts (target 30 shortcuts).
 4. Write key combinations with " + " between keys (e.g. "Ctrl + Shift + N"). When a literal plus key is meant, write "+ (Plus)".
 5. Return ONLY a valid, raw JSON object without any Markdown code blocks, backticks, or extra prose.
 
@@ -196,7 +196,7 @@ Required JSON Structure:
       color,
       description: str(parsed.description, 400),
       descriptionAr: str(parsed.descriptionAr, 400),
-      shortcuts
+      shortcuts: shortcuts.slice(0, 30)
     };
   }
 }
